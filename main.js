@@ -6,22 +6,22 @@ function createPuzzles(rows, cols) {
   
   for (let x = 0; x < rows; x++) {
     for (let y = 0; y < cols; y++) {
-      let puzzle = {};
-      puzzle.id = x * cols + y;
+      let tile = {};
+      tile.id = x * cols + y;
       let degree = Math.floor(Math.random() * 4) * 90;
-      puzzle.img = `<div class="draggable" style="transform: rotate(${degree}deg);">
-        <span class="img-cell" id="${puzzle.id}" style="background-position: ${y*shiftX}% ${x*shiftY}%;
+      tile.img = `<div class="draggable" style="transform: rotate(${degree}deg);">
+        <span class="img-cell" id="${tile.id}" style="background-position: ${y*shiftX}% ${x*shiftY}%;
         grid-row: ${x+1}/${x+2}; grid-column: ${y+1}/${y+2};"></span>
       </div>`;
-      puzzlesData[puzzle.id] = {};
-      puzzlesData[puzzle.id].coords = [{}, {}, {}, {}];
-      puzzlesData[puzzle.id].rotation = degree;
-      puzzlesData[puzzle.id].neighbourLeft = y !== 0 ? puzzle.id - 1 : "none";
-      puzzlesData[puzzle.id].neighbourRight = y !== cols - 1 ? puzzle.id + 1 : "none";
-      puzzlesData[puzzle.id].neighbourTop = x !== 0 ? puzzle.id - cols : "none";
-      puzzlesData[puzzle.id].neighbourBottom = x !== rows - 1 ? puzzle.id + cols : "none";
+      puzzlesData[tile.id] = {};
+      puzzlesData[tile.id].coords = [{}, {}, {}, {}];
+      puzzlesData[tile.id].rotation = degree;
+      puzzlesData[tile.id].neighbourLeft = y !== 0 ? tile.id - 1 : "none";
+      puzzlesData[tile.id].neighbourRight = y !== cols - 1 ? tile.id + 1 : "none";
+      puzzlesData[tile.id].neighbourTop = x !== 0 ? tile.id - cols : "none";
+      puzzlesData[tile.id].neighbourBottom = x !== rows - 1 ? tile.id + cols : "none";
 
-      puzzlesArr.push(puzzle);
+      puzzlesArr.push(tile);
     }
   }
 }
@@ -43,8 +43,8 @@ function shufflePuzzles(array) {
 
 function insertPuzzles(array) {
   let container = document.getElementById('image-sliced');
-  for (let elem of array) {
-    container.insertAdjacentHTML('beforeend', elem.img);
+  for (let tile of array) {
+    container.insertAdjacentHTML('beforeend', tile.img);
   }
 }
 
@@ -79,7 +79,6 @@ document.addEventListener('mousedown', function(event) {
   // remember the initial shift
   // move the element as a direct child of body
   function startDrag(clientX, clientY) {
-
     shiftX = clientX - dragElement.getBoundingClientRect().left;
     shiftY = clientY - dragElement.getBoundingClientRect().top;
     startX = dragElement.getBoundingClientRect().left + shiftX;
@@ -102,8 +101,7 @@ document.addEventListener('mousedown', function(event) {
 
   function onClick() {
     // Rotate element by 90 degrees clockwise
-    let degree = +dragElement.style.transform.replace( /\D+/g, '');
-    degree += 90;
+    let degree = +dragElement.style.transform.replace( /\D+/g, '') + 90;
     if (degree == 360) degree = 0;
     
     for (let child of dragElement.children) {
@@ -115,35 +113,35 @@ document.addEventListener('mousedown', function(event) {
 
   function updateCoords() {
     for (let child of dragElement.children) {
-      let puzzle = puzzlesData[child.id];
-      let puzzleDiv = document.getElementById(`${child.id}`);
-      let puzzleDivCoords = puzzleDiv.getBoundingClientRect();
-      puzzle.coords[0] = {
-        x: parseInt(puzzleDivCoords.left),
-        y: parseInt(puzzleDivCoords.top)
+      let tile = puzzlesData[child.id];
+      let tileDiv = document.getElementById(`${child.id}`);
+      let tileDivCoords = tileDiv.getBoundingClientRect();
+      tile.coords[0] = {
+        x: parseInt(tileDivCoords.left),
+        y: parseInt(tileDivCoords.top)
       };
-      puzzle.coords[1] = {
-        x: parseInt(puzzleDivCoords.left) + puzzleDiv.clientWidth,
-        y: parseInt(puzzleDivCoords.top)
+      tile.coords[1] = {
+        x: parseInt(tileDivCoords.left) + tileDiv.clientWidth,
+        y: parseInt(tileDivCoords.top)
       };
-      puzzle.coords[2] = {
-        x: parseInt(puzzleDivCoords.left) + puzzleDiv.clientWidth,
-        y: parseInt(puzzleDivCoords.top) + puzzleDiv.clientHeight
+      tile.coords[2] = {
+        x: parseInt(tileDivCoords.left) + tileDiv.clientWidth,
+        y: parseInt(tileDivCoords.top) + tileDiv.clientHeight
       };
-      puzzle.coords[3] = {
-        x: parseInt(puzzleDivCoords.left),
-        y: parseInt(puzzleDivCoords.top) + puzzleDiv.clientHeight
+      tile.coords[3] = {
+        x: parseInt(tileDivCoords.left),
+        y: parseInt(tileDivCoords.top) + tileDiv.clientHeight
       };
 
-      switch (puzzle.rotation) {
+      switch (tile.rotation) {
         case 0:
           break;
         case 270:
-          puzzle.coords.push(puzzle.coords.shift());
+          tile.coords.push(tile.coords.shift());
         case 180:
-          puzzle.coords.push(puzzle.coords.shift());
+          tile.coords.push(tile.coords.shift());
         case 90:
-          puzzle.coords.push(puzzle.coords.shift());
+          tile.coords.push(tile.coords.shift());
       }
     }
   }
@@ -151,46 +149,46 @@ document.addEventListener('mousedown', function(event) {
   function checkNeighbours() {
     let divsToMerge = [];
     for (let child of dragElement.children) {
-      let puzzle = puzzlesData[child.id];
+      let tile = puzzlesData[child.id];
 
-      if (puzzle.neighbourLeft != "none" &&
-        Math.abs(puzzle.coords[0].x - puzzlesData[puzzle.neighbourLeft].coords[1].x) < 3 &&
-        Math.abs(puzzle.coords[0].y - puzzlesData[puzzle.neighbourLeft].coords[1].y) < 3 &&
-        puzzle.rotation == puzzlesData[puzzle.neighbourLeft].rotation) {
-          let neighbourDiv = document.getElementById(puzzle.neighbourLeft).parentNode;
+      if (tile.neighbourLeft != "none" &&
+        Math.abs(tile.coords[0].x - puzzlesData[tile.neighbourLeft].coords[1].x) < 3 &&
+        Math.abs(tile.coords[0].y - puzzlesData[tile.neighbourLeft].coords[1].y) < 3 &&
+        tile.rotation == puzzlesData[tile.neighbourLeft].rotation) {
+          let neighbourDiv = document.getElementById(tile.neighbourLeft).parentNode;
           if (!divsToMerge.includes(neighbourDiv)) divsToMerge.push(neighbourDiv);
-          puzzlesData[puzzle.neighbourLeft].neighbourRight = "none";
-          puzzle.neighbourLeft = "none";
+          puzzlesData[tile.neighbourLeft].neighbourRight = "none";
+          tile.neighbourLeft = "none";
       }
 
-      if (puzzle.neighbourRight != "none" &&
-        Math.abs(puzzle.coords[2].x - puzzlesData[puzzle.neighbourRight].coords[3].x) < 3 &&
-        Math.abs(puzzle.coords[2].y - puzzlesData[puzzle.neighbourRight].coords[3].y) < 3 &&
-        puzzle.rotation == puzzlesData[puzzle.neighbourRight].rotation) {
-          let neighbourDiv = document.getElementById(puzzle.neighbourRight).parentNode;
+      if (tile.neighbourRight != "none" &&
+        Math.abs(tile.coords[2].x - puzzlesData[tile.neighbourRight].coords[3].x) < 3 &&
+        Math.abs(tile.coords[2].y - puzzlesData[tile.neighbourRight].coords[3].y) < 3 &&
+        tile.rotation == puzzlesData[tile.neighbourRight].rotation) {
+          let neighbourDiv = document.getElementById(tile.neighbourRight).parentNode;
           if (!divsToMerge.includes(neighbourDiv)) divsToMerge.push(neighbourDiv);
-          puzzlesData[puzzle.neighbourRight].neighbourLeft = "none";
-          puzzle.neighbourRight = "none";
+          puzzlesData[tile.neighbourRight].neighbourLeft = "none";
+          tile.neighbourRight = "none";
       }
 
-      if (puzzle.neighbourTop != "none" &&
-        Math.abs(puzzle.coords[0].x - puzzlesData[puzzle.neighbourTop].coords[3].x) < 3 &&
-        Math.abs(puzzle.coords[0].y - puzzlesData[puzzle.neighbourTop].coords[3].y) < 3 &&
-        puzzle.rotation == puzzlesData[puzzle.neighbourTop].rotation) {
-          let neighbourDiv = document.getElementById(puzzle.neighbourTop).parentNode;
+      if (tile.neighbourTop != "none" &&
+        Math.abs(tile.coords[0].x - puzzlesData[tile.neighbourTop].coords[3].x) < 3 &&
+        Math.abs(tile.coords[0].y - puzzlesData[tile.neighbourTop].coords[3].y) < 3 &&
+        tile.rotation == puzzlesData[tile.neighbourTop].rotation) {
+          let neighbourDiv = document.getElementById(tile.neighbourTop).parentNode;
           if (!divsToMerge.includes(neighbourDiv)) divsToMerge.push(neighbourDiv);
-          puzzlesData[puzzle.neighbourTop].neighbourBottom = "none";
-          puzzle.neighbourTop = "none";
+          puzzlesData[tile.neighbourTop].neighbourBottom = "none";
+          tile.neighbourTop = "none";
       }
 
-      if (puzzle.neighbourBottom != "none" &&
-        Math.abs(puzzle.coords[2].x - puzzlesData[puzzle.neighbourBottom].coords[1].x) < 3 &&
-        Math.abs(puzzle.coords[2].y - puzzlesData[puzzle.neighbourBottom].coords[1].y) < 3 &&
-        puzzle.rotation == puzzlesData[puzzle.neighbourBottom].rotation) {
-          let neighbourDiv = document.getElementById(puzzle.neighbourBottom).parentNode;
+      if (tile.neighbourBottom != "none" &&
+        Math.abs(tile.coords[2].x - puzzlesData[tile.neighbourBottom].coords[1].x) < 3 &&
+        Math.abs(tile.coords[2].y - puzzlesData[tile.neighbourBottom].coords[1].y) < 3 &&
+        tile.rotation == puzzlesData[tile.neighbourBottom].rotation) {
+          let neighbourDiv = document.getElementById(tile.neighbourBottom).parentNode;
           if (!divsToMerge.includes(neighbourDiv)) divsToMerge.push(neighbourDiv);
-          puzzlesData[puzzle.neighbourBottom].neighbourTop = "none";
-          puzzle.neighbourBottom = "none";
+          puzzlesData[tile.neighbourBottom].neighbourTop = "none";
+          tile.neighbourBottom = "none";
       }
     }
 

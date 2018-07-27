@@ -11,10 +11,10 @@
 
 .img-cell {
     display: block;
+    background-repeat: no-repeat;
+    
     width: 100px;
     height: 100px;
-    background-repeat: no-repeat;
-
     background-image: url(./hogwarts.jpg);
     background-size: 400%;
 }
