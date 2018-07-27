@@ -1,5 +1,17 @@
 #image-full {
     margin: 15px;
+    float: left;
+}
+
+#field {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    grid-template-rows: repeat(4, 100px);
+    margin: 13px;
+    float: left;
+    border: 2px green groove;
+    width: 400px;
+    height: 400px;
 }
 
 #image-sliced {
@@ -12,7 +24,7 @@
 .img-cell {
     display: block;
     background-repeat: no-repeat;
-    
+
     width: 100px;
     height: 100px;
     background-image: url(./hogwarts.jpg);

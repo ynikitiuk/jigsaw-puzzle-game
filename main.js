@@ -1,6 +1,6 @@
 "use strict";
 
-function createPuzzles(rows, cols) {
+function createTiles(rows, cols) {
   let shiftX = 100 / (cols - 1);
   let shiftY = 100 / (rows - 1);
   
@@ -14,6 +14,8 @@ function createPuzzles(rows, cols) {
         grid-row: ${x+1}/${x+2}; grid-column: ${y+1}/${y+2};"></span>
       </div>`;
       puzzlesData[tile.id] = {};
+      puzzlesData[tile.id].row = x;
+      puzzlesData[tile.id].col = y;
       puzzlesData[tile.id].coords = [{}, {}, {}, {}];
       puzzlesData[tile.id].rotation = degree;
       puzzlesData[tile.id].neighbourLeft = y !== 0 ? tile.id - 1 : "none";
@@ -21,12 +23,12 @@ function createPuzzles(rows, cols) {
       puzzlesData[tile.id].neighbourTop = x !== 0 ? tile.id - cols : "none";
       puzzlesData[tile.id].neighbourBottom = x !== rows - 1 ? tile.id + cols : "none";
 
-      puzzlesArr.push(tile);
+      tilesArr.push(tile);
     }
   }
 }
 
-function shufflePuzzles(array) {
+function shuffleTiles(array) {
   let currentIndex = array.length,
     temporaryValue,
     randomIndex;
@@ -41,7 +43,7 @@ function shufflePuzzles(array) {
   }
 }
 
-function insertPuzzles(array) {
+function insertTiles(array) {
   let container = document.getElementById('image-sliced');
   for (let tile of array) {
     container.insertAdjacentHTML('beforeend', tile.img);
@@ -52,31 +54,14 @@ document.addEventListener('mousedown', function(event) {
 
   if (event.target.className !== 'img-cell') return;
   let dragElement = event.target.closest('.draggable');
+  if (!dragElement) return;
 
   event.preventDefault();
   let startX, startY, shiftX, shiftY;
 
   startDrag(event.clientX, event.clientY);
 
-  document.addEventListener('mousemove', onMouseMove);
-
-  dragElement.onmouseup = function() {
-    document.removeEventListener('mousemove', onMouseMove);
-    dragElement.onmouseup = null;
-    if (startX === event.clientX &&
-        startY === event.clientY) onClick();
-    updateCoords();
-    checkNeighbours();
-  };
-
-  function onMouseMove(event) {
-    //Remember initial coordinates
-    startX = dragElement.getBoundingClientRect().left + shiftX;
-    startY = dragElement.getBoundingClientRect().top + shiftY;
-    moveAt(event.clientX, event.clientY);
-  }
-
-  // remember the initial shift
+  // remember the initial shift and start position
   // move the element as a direct child of body
   function startDrag(clientX, clientY) {
     shiftX = clientX - dragElement.getBoundingClientRect().left;
@@ -88,8 +73,27 @@ document.addEventListener('mousedown', function(event) {
       dragElement.style.position = 'absolute';
       dragElement.style.left = clientX - shiftX + 'px';
       dragElement.style.top = clientY - shiftY + 'px';
-      document.body.append(dragElement);
     }
+    document.body.append(dragElement);
+  }
+
+  document.addEventListener('mousemove', onMouseMove);
+
+  dragElement.onmouseup = function() {
+    document.removeEventListener('mousemove', onMouseMove);
+    dragElement.onmouseup = null;
+    // 
+    if (startX === event.clientX &&
+        startY === event.clientY) onClick();
+    updateCoords(dragElement);
+    checkPosition();
+  };
+
+  function onMouseMove(event) {
+    // Remember initial coordinates
+    startX = dragElement.getBoundingClientRect().left + shiftX;
+    startY = dragElement.getBoundingClientRect().top + shiftY;
+    moveAt(event.clientX, event.clientY);
   }
 
   function moveAt(clientX, clientY) {
@@ -101,18 +105,17 @@ document.addEventListener('mousedown', function(event) {
 
   function onClick() {
     // Rotate element by 90 degrees clockwise
-    let degree = +dragElement.style.transform.replace( /\D+/g, '') + 90;
+    let degree = +dragElement.style.transform.replace(/\D+/g, '') + 90;
     if (degree == 360) degree = 0;
-    
+    dragElement.style.transform = `rotate(${degree}deg)`;
+
     for (let child of dragElement.children) {
       puzzlesData[child.id].rotation = degree;
     }
-
-    dragElement.style.transform = `rotate(${degree}deg)`;
   }
 
-  function updateCoords() {
-    for (let child of dragElement.children) {
+  function updateCoords(element) {
+    for (let child of element.children) {
       let tile = puzzlesData[child.id];
       let tileDiv = document.getElementById(`${child.id}`);
       let tileDivCoords = tileDiv.getBoundingClientRect();
@@ -144,6 +147,24 @@ document.addEventListener('mousedown', function(event) {
           tile.coords.push(tile.coords.shift());
       }
     }
+  }
+
+  function checkPosition() {
+    let field = document.getElementById('field');
+    let fieldPositionTop = field.offsetTop + field.clientTop + puzzlesData[dragElement.firstElementChild.id].row * 100;
+    let fieldPositionLeft = field.offsetLeft + field.clientLeft + puzzlesData[dragElement.firstElementChild.id].col * 100;
+    let tileCoords = dragElement.firstElementChild.getBoundingClientRect();
+
+    if (+dragElement.style.transform.replace(/\D+/g, '') === 0 &&
+        Math.abs(fieldPositionTop - tileCoords.top) < 3 &&
+        Math.abs(fieldPositionLeft - tileCoords.left) < 3) {
+      field.append(...dragElement.children);
+      updateCoords(field);
+      dragElement.remove();
+      return;
+    }
+    
+    checkNeighbours();
   }
 
   function checkNeighbours() {
@@ -205,13 +226,13 @@ document.addEventListener('mousedown', function(event) {
       dragElement.style.top = newY + "px";
       div.remove();
     }
-    updateCoords();
+    updateCoords(dragElement);
   }
 });
 
-let puzzlesArr = [];
+let tilesArr = [];
 let puzzlesData = [];
 
-createPuzzles(4, 4);
-shufflePuzzles(puzzlesArr);
-insertPuzzles(puzzlesArr);
+createTiles(4, 4);
+shuffleTiles(tilesArr);
+insertTiles(tilesArr);
