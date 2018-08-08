@@ -1,0 +1,35 @@
+{
+  "name": "karma-experiments",
+  "version": "1.0.0",
+  "description": "",
+  "main": "puzzle-game.ts",
+  "private": true,
+  "scripts": {
+    "test": "karma start ./karma.conf.js",
+    "dev": "webpack-dev-server --open",
+    "build": "webpack"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "html-webpack-plugin": "^3.2.0",
+    "istanbul-instrumenter-loader": "^3.0.1",
+    "jasmine-core": "^3.1.0",
+    "karma": "^2.0.5",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage-istanbul-reporter": "^2.0.1",
+    "karma-jasmine": "^1.1.2",
+    "karma-webpack": "^3.0.0",
+    "webpack": "^4.16.3",
+    "webpack-cli": "^2.0.9",
+    "ts-loader": "^4.4.2",
+    "typescript": "^2.9.2"
+  },
+  "dependencies": {
+    "webpack-dev-server": "^3.1.5"
+  }
+}

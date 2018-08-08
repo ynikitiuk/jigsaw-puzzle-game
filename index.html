@@ -8,11 +8,27 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <img id="image-full" src="./hogwarts.jpg" height="400">
-    <div id="field"></div>
+    <div id="grid">
+        <div id="preview" class="preview show"></div>
+        <div id="choose">
+            <label for="list">Choose image...</label>
+            <select id="list">
+                <option value="./img/cat.jpg">Newspaper Cat</option>
+                <option value="./img/cat-and-book.jpg">Book Cat</option>
+                <option value="./img/hogwarts.jpg">Hogwarts</option>
+            </select>
+        </div>
+        <div id="upload">
+            <label for="file">...or upload your own.</label>
+            <input type="file" id="file" name="file" accept=".png, .jpg, .jpeg">
+        </div>
+        <div id="start-button">
+            <button id="start">Start game</button>
+        </div>
+        <div id="field"> </div>
+        <div id="hint"><span id="arrow">&#8664</span></div>
+        <div id="image-sliced"></div>
+    </div>
 
-    <div id="image-sliced"></div>
-
-    <script src="main.js"></script>
 </body>
 </html>
